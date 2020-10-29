@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/nanjingcaiyong/richjs/issues"
   },
-  "homepage": "https://github.com/nanjingcaiyong/richjs#readme"
+  "homepage": "https://github.com/nanjingcaiyong/richjs#readme",
+  "devDependencies": {
+    "eslint": "^7.12.1"
+  }
 }
