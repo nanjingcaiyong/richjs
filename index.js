@@ -125,6 +125,26 @@
             }
             return res
         }
+        /**
+         * @description 深入Object.assign
+         * @param { object } target 目标对象
+         * @param { object } obj 数据对象
+         */
+        function deepAssign(target, obj){
+            if (!target) target = Array.isArray(obj) ? [] : {};
+            if (obj && objectType[typeof obj]) {
+                for (let key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    if (obj[key] && objectType[typeof obj]) {
+                    target[key] = deepAssign(target[key],obj[key]);
+                    } else {
+                    target[key] = obj[key];
+                    }
+                }
+                }
+            }
+            return target;
+        }
         function rich () {}
         rich.isDom = isDom
         rich.timestampToDate = timestampToDate
@@ -133,6 +153,7 @@
         rich.toUpperCaseFirstWord = toUpperCaseFirstWord
         rich.getUrlQueryvalue = getUrlQueryvalue
         rich.distinctByKey = distinctByKey
+        rich.deepAssign = deepAssign
         return rich
     }
     var $$ = runInContext();
