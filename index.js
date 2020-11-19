@@ -126,7 +126,7 @@
             return res
         }
         /**
-         * @description 深入Object.assign
+         * @description 深度Object.assign
          * @param { object } target 目标对象
          * @param { object } obj 数据对象
          */
@@ -134,16 +134,33 @@
             if (!target) target = Array.isArray(obj) ? [] : {};
             if (obj && objectType[typeof obj]) {
                 for (let key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    if (obj[key] && objectType[typeof obj]) {
-                    target[key] = deepAssign(target[key],obj[key]);
-                    } else {
-                    target[key] = obj[key];
+                    if (obj.hasOwnProperty(key)) {
+                        if (obj[key] && objectType[typeof obj]) {
+                            target[key] = deepAssign(target[key],obj[key]);
+                        } else {
+                            target[key] = obj[key];
+                        }
                     }
-                }
                 }
             }
             return target;
+        }
+        /**
+         * @description 展平树形数据
+         * @default { object } 树形数据
+         * @default { function } 回调
+         */
+        function flatTree(tree, callback) {
+            return tree.reduce((acc, node) => {
+              if (callback(node)) {
+                acc.push(node);
+              }
+              if (node.children) {
+                const children = flatTree(node.children, callback);
+                acc.push(...children);
+              }
+              return acc;
+            }, []);
         }
         function rich () {}
         rich.isDom = isDom
@@ -154,6 +171,7 @@
         rich.getUrlQueryvalue = getUrlQueryvalue
         rich.distinctByKey = distinctByKey
         rich.deepAssign = deepAssign
+        rich.flatTree = flatTree
         return rich
     }
     var $$ = runInContext();
