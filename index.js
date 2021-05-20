@@ -1,6 +1,6 @@
 (function () {
     // 版本号
-    var VERSION = '0.0.1';
+    var VERSION = '0.0.2';
 
     //#region 正则
     /** 空格 */
@@ -40,7 +40,9 @@
          * @param { any } value 待判定的对象
          */
         function isDom (value) {
-            return typeof HTMLElement === 'function' ? value instanceof HTMLElement : (value && typeof value === 'object' && value.nodeType === 1 && typeof value.nodeName === 'string')
+            return typeof HTMLElement === 'function' 
+                ? value instanceof HTMLElement 
+                : (value && typeof value === 'object' && value.nodeType === 1 && typeof value.nodeName === 'string')
         }
         /**
          * @description 时间戳转日期
@@ -162,6 +164,37 @@
               return acc;
             }, []);
         }
+
+        /**
+         * @description 判断dom是否在可视区域内
+         * @param { HTMLElement } el dom节点
+         * @returns 
+         */
+        function isElementInViewport (el) {
+            var rect = el.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (win.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (win.innerWidth || document.documentElement.clientWidth)
+            );
+        }
+        /**
+         * @description 获取dom在当前页面中的位置(不是在浏览器可视窗口的位置)
+         * @param { HTMLElement } el dom节点
+         */
+        function getClientRect (el) {
+            var rect = el.getBoundingClientRect();
+            var documentElement = document ? document.documentElement : {}
+            var top = rect.top + documentElement.scrollTop
+            var left = rect.left + documentElement.scrollLeft
+            return {
+                x: left,
+                left,
+                y: top,
+                top,
+            }
+        }
         function rich () {}
         rich.isDom = isDom
         rich.timestampToDate = timestampToDate
@@ -172,6 +205,8 @@
         rich.distinctByKey = distinctByKey
         rich.deepAssign = deepAssign
         rich.flatTree = flatTree
+        rich.isElementInViewport = isElementInViewport
+        rich.getClientRect = getClientRect
         return rich
     }
     var $$ = runInContext();
