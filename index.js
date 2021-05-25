@@ -195,6 +195,109 @@
                 top,
             }
         }
+
+        /**
+         * @description 当持续触发事件时，一定时间段内没有再触发事件，事件处理函数才会执行一次，如果设定的时间到来之前，又一次触发了事件，就重新开始延时
+         * @param {*} fn 回调
+         * @param {*} wait 规定时间
+         * @param {*} immediate 是否立即执行，停止触发 n 秒后，才可以重新触发执行。反过来
+         * @returns 
+         */
+        function debounce(fn, wait, immediate) {
+            let timer;
+            return function () {
+                if (timer) clearTimeout(timer);
+                if (immediate) {
+                    // 如果已经执行过，不再执行
+                    var callNow = !timer;
+                    timer = setTimeout(() => {
+                        timer = null;
+                    }, wait)
+                    if (callNow) {
+                        fn.apply(this, arguments)
+                    }
+                } else {
+                    timer = setTimeout(() => {
+                        fn.apply(this, arguments)
+                    }, wait);
+                }
+            }
+        }
+        /**
+         * @description 表示dom文档结构已经加载完成（不包含图片等非文字媒体文件）
+         * @param {*} fn 回调
+         */
+        function whenReady (fn) {
+            var queue = [],     // 回调队列
+                isReady = false // dom是否加载完成
+            if (isReady) {
+                fn.call(window)
+            } else {
+                queue.push(fn)
+            }
+            bindReady()
+            // 绑定ready
+            function bindReady () {
+                // 在这使用 readyState === "interactive", 会引起下面问题
+                // IE9在页面尚未完全生成，有时也会触发DOMContentLoaded,由ChrisS在这里发现 https://bugs.jquery.com/ticket/12282#comment:15
+                // 所以干脆在 readyState === "complete" 后用setTimeout执行
+                if (document.readyState === "complete") {
+                    setTimeout(ready)
+                } else if (document.addEventListener) {
+                    document.addEventListener("DOMContentLoaded", completed)
+                    window.addEventListener( "load", completed ); // 兜底方案
+                } else { // 如果IE事件模型被使用 
+                    document.attachEvent( "onreadystatechange", completed );
+                    window.attachEvent( "onload", completed );  // 兜底方案
+                    var top = false;
+                    try {
+                        top = window.frameElement == null && document.documentElement;
+                    } catch ( e ) {}
+                    if ( top && top.doScroll ) {
+                        ( function doScrollCheck() {
+                            if (!isReady) {
+                                try {
+                                    top.doScroll( "left" ); // dom没加载完成.doScroll报错
+                                } catch ( e ) {
+                                    return setTimeout( doScrollCheck, 50 );
+                                }
+                                detach()
+                                ready();
+                            }
+                        } )();
+                    }
+                }
+            }
+            function ready () {
+                // 确保body存在
+                if (!document.body) {
+                    return setTimeout(ready)
+                }
+                isReady = true
+                // 执行绑定的事件
+                for (let index = 0; index < queue.length; index++) {
+                    queue[index].call(window)
+                }
+            }
+            // ready触发执行完回调后,解绑
+            function detach () {
+                if ( document.addEventListener ) {
+                    document.removeEventListener( "DOMContentLoaded", completed, false );
+                    window.removeEventListener( "load", completed, false );
+        
+                } else {
+                    document.detachEvent( "onreadystatechange", completed );
+                    window.detachEvent( "onload", completed );
+                }
+            }
+            function completed (event) {
+                if ( document.addEventListener || event.type === "load" || document.readyState === "complete" ) {
+                    detach();
+                    ready();
+                }
+            }
+        }
+
         function rich () {}
         rich.isDom = isDom
         rich.timestampToDate = timestampToDate
@@ -207,6 +310,8 @@
         rich.flatTree = flatTree
         rich.isElementInViewport = isElementInViewport
         rich.getClientRect = getClientRect
+        rich.debounce = debounce
+        rich.whenReady = whenReady
         return rich
     }
     var $$ = runInContext();
